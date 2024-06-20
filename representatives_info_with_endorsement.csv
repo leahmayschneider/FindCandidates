@@ -1,0 +1,18 @@
+Division ID_x,Division Name,Office Index,Office Name,Division ID_y,Levels,Roles,Sources,Official Index,Official Name,Party,Is Endorsed
+ocd-division/country:us,United States,0,President of the United States,ocd-division/country:us,country,"headOfGovernment, headOfState",,0,Joseph R. Biden,Democratic Party,False
+ocd-division/country:us,United States,1,Vice President of the United States,ocd-division/country:us,country,deputyHeadOfGovernment,,1,Kamala D. Harris,Democratic Party,False
+ocd-division/country:us/state:ny,New York,2,U.S. Senator,ocd-division/country:us/state:ny,country,legislatorUpperBody,,2,Charles E. Schumer,Democratic Party,False
+ocd-division/country:us/state:ny,New York,2,U.S. Senator,ocd-division/country:us/state:ny,country,legislatorUpperBody,,3,Kirsten E. Gillibrand,Democratic Party,False
+ocd-division/country:us/state:ny/cd:13,New York's 13th congressional district,3,U.S. Representative,ocd-division/country:us/state:ny/cd:13,country,legislatorLowerBody,,4,Adriano Espaillat,Democratic Party,False
+ocd-division/country:us/state:ny,New York,4,Governor of New York,ocd-division/country:us/state:ny,administrativeArea1,headOfGovernment,,5,Kathleen C. Hochul,Democratic Party,False
+ocd-division/country:us/state:ny,New York,5,Lieutenant Governor of New York,ocd-division/country:us/state:ny,administrativeArea1,deputyHeadOfGovernment,,6,Antonio Delgado,Democratic Party,False
+ocd-division/country:us/state:ny,New York,6,NY State Comptroller,ocd-division/country:us/state:ny,administrativeArea1,governmentOfficer,,7,Thomas P. DiNapoli,Democratic Party,False
+ocd-division/country:us/state:ny,New York,7,NY State Attorney General,ocd-division/country:us/state:ny,administrativeArea1,governmentOfficer,,8,Letitia James,Democratic Party,False
+ocd-division/country:us/state:ny/sldu:30,New York State Senate district 30,8,NY State Senator,ocd-division/country:us/state:ny/sldu:30,administrativeArea1,legislatorUpperBody,,9,Cordell Cleare,Democratic Party,True
+ocd-division/country:us/state:ny/sldl:70,New York Assembly district 70,9,NY State Assembly Member,ocd-division/country:us/state:ny/sldl:70,administrativeArea1,legislatorLowerBody,,10,Inez E. Dickens,Democratic Party,False
+ocd-division/country:us/state:ny/county:new_york,New York County,10,Manhattan Borough President,ocd-division/country:us/state:ny/county:new_york,administrativeArea2,headOfGovernment,,11,Mark D. Levine,Democratic Party,False
+ocd-division/country:us/state:ny/county:new_york,New York County,11,Manhattan District Attorney,ocd-division/country:us/state:ny/county:new_york,administrativeArea2,governmentOfficer,,12,,,False
+ocd-division/country:us/state:ny/place:new_york,New York city,12,Mayor of New York,ocd-division/country:us/state:ny/place:new_york,locality,headOfGovernment,,13,,,False
+ocd-division/country:us/state:ny/place:new_york,New York city,13,New York Public Advocate,ocd-division/country:us/state:ny/place:new_york,locality,governmentOfficer,,14,Jumaane D. Williams,Democratic Party,False
+ocd-division/country:us/state:ny/place:new_york,New York city,14,New York City Comptroller,ocd-division/country:us/state:ny/place:new_york,locality,governmentOfficer,,15,Brad Lander,Democratic Party,False
+ocd-division/country:us/state:ny/place:new_york/council_district:9,New York City NY - city council district 9,15,New York City Council Member,ocd-division/country:us/state:ny/place:new_york/council_district:9,locality,legislatorLowerBody,,16,Yusef Salaam,Democratic Party,False

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .log-output {
+            white-space: pre-wrap; /* Ensures that the log output preserves whitespace and line breaks */
+            background-color: #f8f9fa; /* Light grey background for better readability */
+            border: 1px solid #dee2e6; /* Border to separate from other content */
+            padding: 15px; /* Some padding for better spacing */
+            border-radius: 5px; /* Rounded corners */
+            max-height: 300px; /* Max height to avoid too much scrolling */
+            overflow-y: auto; /* Scrollable if content exceeds max height */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Endorsement</h2>
+        <div class="log-output">{{ log_output }}</div>
+        <a href="/download_csv" class="btn btn-primary mt-3">Download Candidates Info CSV</a>
+        <a href="/" class="btn btn-secondary mt-3">Enter a New Address</a>
+    </div>
+</body>
+</html>
