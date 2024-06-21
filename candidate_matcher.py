@@ -2,24 +2,20 @@ import pandas as pd
 from fuzzywuzzy import process
 import re
 from mappings import term_mapping, state_abbreviation_map, clean_text
-import io
 
 
 class CandidateMatcher:
-
     def __init__(self, endorsed_candidates_path):
-        self.endorsed_candidates = self.load_endorsed_candidates(
-            endorsed_candidates_path)
-        self.output = io.StringIO()  # Capture print statements
+        self.endorsed_candidates = self.load_endorsed_candidates(endorsed_candidates_path)
 
     def load_endorsed_candidates(self, file_path):
         endorsed_candidates_df = pd.read_excel(file_path)
         endorsed_candidates_df['state'] = endorsed_candidates_df['state'].map(
             lambda x: state_abbreviation_map.get(x.upper(), x))
-        endorsed_candidates_df['district_number'] = endorsed_candidates_df[
-            'position'].apply(self.extract_district_number)
-        endorsed_candidates_df['clean_position'] = endorsed_candidates_df[
-            'position'].apply(self.standardize_and_clean)
+        endorsed_candidates_df['district_number'] = endorsed_candidates_df['position'].apply(
+            self.extract_district_number)
+        endorsed_candidates_df['clean_position'] = endorsed_candidates_df['position'].apply(self.standardize_and_clean)
+        endorsed_candidates_df['original_position'] = endorsed_candidates_df['position']  # Preserve original position
         return endorsed_candidates_df
 
     def standardize_and_clean(self, term):
@@ -33,8 +29,7 @@ class CandidateMatcher:
         match = re.search(r'(\d+)', text)
         return match.group(1) if match else None
 
-    def is_endorsed(self, division_name, office_name,
-                    endorsed_candidates_state_df):
+    def is_endorsed(self, division_name, office_name, endorsed_candidates_state_df):
         # Extract and remove district numbers
         division_district_number = self.extract_district_number(division_name)
         office_district_number = self.extract_district_number(office_name)
@@ -50,45 +45,46 @@ class CandidateMatcher:
         combined_office = f"{division_district_number}, {office_name_standard}"
 
         for _, row in endorsed_candidates_state_df.iterrows():
-            original_candidate_position = row['position']
+            original_candidate_position = row['original_position']
             candidate_position_clean = row['clean_position']
             candidate_district_number = row['district_number']
 
             if candidate_district_number and division_district_number:
                 if candidate_district_number == division_district_number:
-                    position_match_score = process.extractOne(
-                        candidate_position_clean, [office_name_standard])[1]
+                    position_match_score = process.extractOne(candidate_position_clean, [office_name_standard])[1]
                     if position_match_score > 90:
-                        print(
-                            f"In your district, WFP endorses {row['name']} running for {original_candidate_position} ",
-                            file=self.output)
-                        return True
+                        return row[
+                            'name'], f"In your district, WFP endorses {row['name']} running for {original_candidate_position}"
             elif not candidate_district_number and not division_district_number:
-                position_match_score = process.extractOne(
-                    candidate_position_clean, [office_name_standard])[1]
+                position_match_score = process.extractOne(candidate_position_clean, [office_name_standard])[1]
                 if position_match_score > 90:
-                    print(
-                        f"In your district, WFP endorses {row['name']} running for {original_candidate_position}",
-                        file=self.output)
-                    return True
-        return False
+                    return row[
+                        'name'], f"In your district, WFP endorses {row['name']} running for {original_candidate_position}"
+        return None, None
 
     def mark_endorsed_candidates(self, api_df, normalized_state):
         # Filter endorsed candidates by normalized state
         endorsed_candidates_state_df = self.endorsed_candidates[
-            self.endorsed_candidates['state'].str.lower() ==
-            normalized_state.lower()]
+            self.endorsed_candidates['state'].str.lower() == normalized_state.lower()]
 
         # Ensure necessary columns are of correct type
         api_df.loc[:, 'Division Name'] = api_df['Division Name'].astype(str)
         api_df.loc[:, 'Office Name'] = api_df['Office Name'].astype(str)
 
-        # Apply endorsement check
-        api_df.loc[:, 'Is Endorsed'] = api_df.apply(
-            lambda x: self.is_endorsed(x['Division Name'], x['Office Name'],
-                                       endorsed_candidates_state_df),
-            axis=1)
-        return api_df
+        # Apply endorsement check and collect messages
+        endorsement_messages = []
+        api_df['Endorsee'] = api_df.apply(
+            lambda x: self.is_endorsed(x['Division Name'], x['Office Name'], endorsed_candidates_state_df), axis=1)
 
-    def get_output(self):
-        return self.output.getvalue()
+        for endorsee, message in api_df['Endorsee']:
+            if endorsee:
+                endorsement_messages.append(message)
+
+        # Print unique messages
+        for message in set(endorsement_messages):
+            print(message)
+
+        # Update Endorsee column to contain the endorsee name or 'None'
+        api_df['Endorsee'] = api_df['Endorsee'].apply(lambda x: x[0] if x[0] else 'None')
+
+        return api_df
