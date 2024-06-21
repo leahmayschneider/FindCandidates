@@ -2,18 +2,20 @@ import pandas as pd
 from fuzzywuzzy import process
 import re
 from mappings import term_mapping, state_abbreviation_map, clean_text
+import io
 
 
 class CandidateMatcher:
+
     def __init__(self, endorsed_candidates_path):
         self.endorsed_candidates = self.load_endorsed_candidates(endorsed_candidates_path)
+        self.output = io.StringIO()  # Capture print statements
 
     def load_endorsed_candidates(self, file_path):
         endorsed_candidates_df = pd.read_excel(file_path)
         endorsed_candidates_df['state'] = endorsed_candidates_df['state'].map(
             lambda x: state_abbreviation_map.get(x.upper(), x))
-        endorsed_candidates_df['district_number'] = endorsed_candidates_df['position'].apply(
-            self.extract_district_number)
+        endorsed_candidates_df['district_number'] = endorsed_candidates_df['position'].apply(self.extract_district_number)
         endorsed_candidates_df['clean_position'] = endorsed_candidates_df['position'].apply(self.standardize_and_clean)
         endorsed_candidates_df['original_position'] = endorsed_candidates_df['position']  # Preserve original position
         return endorsed_candidates_df
@@ -53,14 +55,16 @@ class CandidateMatcher:
                 if candidate_district_number == division_district_number:
                     position_match_score = process.extractOne(candidate_position_clean, [office_name_standard])[1]
                     if position_match_score > 90:
-                        return row[
-                            'name'], f"In your district, WFP endorses {row['name']} running for {original_candidate_position}"
+                        message = f"In your district, WFP endorses {row['name']} running for {original_candidate_position}"
+                        print(message, file=self.output)
+                        return row['name']
             elif not candidate_district_number and not division_district_number:
                 position_match_score = process.extractOne(candidate_position_clean, [office_name_standard])[1]
                 if position_match_score > 90:
-                    return row[
-                        'name'], f"In your district, WFP endorses {row['name']} running for {original_candidate_position}"
-        return None, None
+                    message = f"In your district, WFP endorses {row['name']} running for {original_candidate_position}"
+                    print(message, file=self.output)
+                    return row['name']
+        return 'None'
 
     def mark_endorsed_candidates(self, api_df, normalized_state):
         # Filter endorsed candidates by normalized state
@@ -72,19 +76,10 @@ class CandidateMatcher:
         api_df.loc[:, 'Office Name'] = api_df['Office Name'].astype(str)
 
         # Apply endorsement check and collect messages
-        endorsement_messages = []
         api_df['Endorsee'] = api_df.apply(
             lambda x: self.is_endorsed(x['Division Name'], x['Office Name'], endorsed_candidates_state_df), axis=1)
 
-        for endorsee, message in api_df['Endorsee']:
-            if endorsee:
-                endorsement_messages.append(message)
-
-        # Print unique messages
-        for message in set(endorsement_messages):
-            print(message)
-
-        # Update Endorsee column to contain the endorsee name or 'None'
-        api_df['Endorsee'] = api_df['Endorsee'].apply(lambda x: x[0] if x[0] else 'None')
-
         return api_df
+
+    def get_output(self):
+        return self.output.getvalue()
