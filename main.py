@@ -26,9 +26,17 @@ async def fetch(request: Request, address: str = Form(...)):
     # Capture print statements
     log_output = matcher.get_output()
 
+    # Define the columns to be included in the CSV
+    columns_to_include = [
+        "Division Name","Office Name","Levels","Roles","Official Name","Party","Endorsee"
+    ]
+
+    # Ensure only the specified columns are included in the output CSV
+    df_to_export = df[columns_to_include]
+
     # Use /tmp directory for writable filesystem
     csv_file_path = '/tmp/representatives_info_with_endorsement.csv'
-    df.to_csv(csv_file_path, index=False)
+    df_to_export.to_csv(csv_file_path, index=False)
 
     return templates.TemplateResponse(
         "results.html", {
