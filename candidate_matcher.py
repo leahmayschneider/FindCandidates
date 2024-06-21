@@ -4,7 +4,6 @@ import re
 from mappings import term_mapping, state_abbreviation_map, clean_text
 import io
 
-
 class CandidateMatcher:
 
     def __init__(self, endorsed_candidates_path):
@@ -57,14 +56,14 @@ class CandidateMatcher:
                     if position_match_score > 90:
                         message = f"In your district, WFP endorses {row['name']} running for {original_candidate_position}"
                         print(message, file=self.output)
-                        return row['name']
+                        return row['name'], message
             elif not candidate_district_number and not division_district_number:
                 position_match_score = process.extractOne(candidate_position_clean, [office_name_standard])[1]
                 if position_match_score > 90:
                     message = f"In your district, WFP endorses {row['name']} running for {original_candidate_position}"
                     print(message, file=self.output)
-                    return row['name']
-        return 'None'
+                    return row['name'], message
+        return None, None
 
     def mark_endorsed_candidates(self, api_df, normalized_state):
         # Filter endorsed candidates by normalized state
@@ -78,6 +77,19 @@ class CandidateMatcher:
         # Apply endorsement check and collect messages
         api_df['Endorsee'] = api_df.apply(
             lambda x: self.is_endorsed(x['Division Name'], x['Office Name'], endorsed_candidates_state_df), axis=1)
+
+        # Collect unique messages and update the dataframe
+        unique_messages = set()
+        for endorsee, message in api_df['Endorsee']:
+            if message:
+                unique_messages.add(message)
+
+        # Print unique messages
+        for message in unique_messages:
+            print(message)
+
+        # Update Endorsee column to contain the endorsee name or 'None'
+        api_df['Endorsee'] = api_df['Endorsee'].apply(lambda x: x[0] if x[0] else 'None')
 
         return api_df
 
