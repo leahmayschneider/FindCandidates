@@ -4,7 +4,6 @@ from fastapi.templating import Jinja2Templates
 from civic_info_api import CivicInfoAPI
 from candidate_matcher import CandidateMatcher
 import pandas as pd
-import uvicorn
 import os
 
 app = FastAPI()
@@ -27,20 +26,22 @@ async def fetch(request: Request, address: str = Form(...)):
     # Capture print statements
     log_output = matcher.get_output()
 
-    csv_file_path = 'representatives_info_with_endorsement.csv'
+    # Use /tmp directory for writable filesystem
+    csv_file_path = '/tmp/representatives_info_with_endorsement.csv'
     df.to_csv(csv_file_path, index=False)
 
     return templates.TemplateResponse(
         "results.html", {
             "request": request,
             "log_output": log_output,
-            "csv_link": csv_file_path
+            "csv_link": "/download_csv"
         })
 
 @app.get("/download_csv")
 async def download_csv():
-    csv_file_path = 'representatives_info_with_endorsement.csv'
+    csv_file_path = '/tmp/representatives_info_with_endorsement.csv'
     return FileResponse(csv_file_path, filename="representatives_info_with_endorsement.csv")
 
 if __name__ == '__main__':
+    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
